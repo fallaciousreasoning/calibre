@@ -80,41 +80,8 @@ qraw = subprocess.check_output([QMAKE, '-query']).decode('utf-8')
 def readvar(name):
     return re.search('^%s:(.+)$' % name, qraw, flags=re.M).group(1).strip()
 
-
-pyqt = {x:readvar(y) for x, y in (
-    ('inc', 'QT_INSTALL_HEADERS'), ('lib', 'QT_INSTALL_LIBS')
-)}
-qt = {x:readvar(y) for x, y in {'libs':'QT_INSTALL_LIBS', 'plugins':'QT_INSTALL_PLUGINS'}.items()}
-qmakespec = readvar('QMAKE_SPEC') if iswindows else None
-
-pyqt['sip_bin'] = os.environ.get('SIP_BIN', 'sip')
-
-from PyQt5.QtCore import PYQT_CONFIGURATION
-pyqt['sip_flags'] = PYQT_CONFIGURATION['sip_flags']
-
-
-def get_sip_dir():
-    if iswindows:
-        q = os.path.join(sys.prefix, 'share', 'sip')
-    elif isfreebsd:
-        q = os.path.join(sys.prefix, 'share', 'py-sip')
-    else:
-        q = os.path.join(sys.prefix, 'share', 'sip')
-    q = os.environ.get('SIP_DIR', q)
-    for x in ('', 'Py2-PyQt5', 'PyQt5', 'sip/PyQt5'):
-        base = os.path.join(q, x)
-        if os.path.exists(os.path.join(base, 'QtWidgets')):
-            return base
-    raise EnvironmentError('Failed to find the location of the PyQt5 .sip files')
-
-
-pyqt['pyqt_sip_dir'] = get_sip_dir()
-pyqt['sip_inc_dir'] = os.environ.get('SIP_INC_DIR', sysconfig.get_path('include'))
-
 glib_flags = subprocess.check_output([PKGCONFIG, '--libs', 'glib-2.0']).decode('utf-8').strip() if islinux or ishaiku else ''
 fontconfig_flags = subprocess.check_output([PKGCONFIG, '--libs', 'fontconfig']).decode('utf-8').strip() if islinux or ishaiku else ''
-qt_inc = pyqt['inc']
-qt_lib = pyqt['lib']
 ft_lib_dirs = []
 ft_libs = []
 ft_inc_dirs = []
