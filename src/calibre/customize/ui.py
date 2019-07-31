@@ -17,7 +17,6 @@ from calibre.customize.conversion import InputFormatPlugin, OutputFormatPlugin
 from calibre.customize.zipplugin import loader
 from calibre.customize.profiles import InputProfile, OutputProfile
 from calibre.customize.builtins import plugins as builtin_plugins
-from calibre.devices.interface import DevicePlugin
 from calibre.ebooks.metadata import MetaInformation
 from calibre.utils.config import (make_config_dir, Config, ConfigProxy,
                                  plugin_dir, OptionParser)
@@ -589,28 +588,6 @@ def plugin_for_catalog_format(fmt):
         if fmt.lower() in plugin.file_types:
             return plugin
 
-# }}}
-
-# Device plugins {{{
-
-
-def device_plugins(include_disabled=False):
-    for plugin in _initialized_plugins:
-        if isinstance(plugin, DevicePlugin):
-            if include_disabled or not is_disabled(plugin):
-                if platform in plugin.supported_platforms:
-                    if getattr(plugin, 'plugin_needs_delayed_initialization',
-                            False):
-                        plugin.do_delayed_plugin_initialization()
-                    yield plugin
-
-
-def disabled_device_plugins():
-    for plugin in _initialized_plugins:
-        if isinstance(plugin, DevicePlugin):
-            if is_disabled(plugin):
-                if platform in plugin.supported_platforms:
-                    yield plugin
 # }}}
 
 # Metadata sources2 {{{
