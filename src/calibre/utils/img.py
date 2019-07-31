@@ -13,10 +13,6 @@ import tempfile
 from io import BytesIO
 from threading import Thread
 
-# We use explicit module imports so tracebacks when importing are more useful
-from PyQt5.QtCore import QBuffer, QByteArray, Qt
-from PyQt5.QtGui import QColor, QImage, QImageReader, QImageWriter, QPixmap, QTransform
-
 from calibre import fit_image, force_unicode
 from calibre.constants import iswindows, plugins
 from calibre.ptempfile import TemporaryDirectory
@@ -26,10 +22,6 @@ from calibre.utils.imghdr import what
 from polyglot.builtins import string_or_bytes
 
 # Utilities {{{
-imageops, imageops_err = plugins['imageops']
-if imageops is None:
-    raise RuntimeError(imageops_err)
-
 
 class NotImage(ValueError):
     pass
@@ -51,21 +43,6 @@ def get_exe_path(name):
         return name
     return os.path.join(base, name)
 
-
-def load_jxr_data(data):
-    with TemporaryDirectory() as tdir:
-        if iswindows and isinstance(tdir, type('')):
-            tdir = tdir.encode('mbcs')
-        with lopen(os.path.join(tdir, 'input.jxr'), 'wb') as f:
-            f.write(data)
-        cmd = [get_exe_path('JxrDecApp'), '-i', 'input.jxr', '-o', 'output.tif']
-        creationflags = 0x08 if iswindows else 0
-        subprocess.Popen(cmd, cwd=tdir, stdout=lopen(os.devnull, 'wb'), stderr=subprocess.STDOUT, creationflags=creationflags).wait()
-        i = QImage()
-        if not i.load(os.path.join(tdir, 'output.tif')):
-            raise NotImage('Failed to convert JPEG-XR image')
-        return i
-
 # }}}
 
 # Loading images {{{
@@ -73,20 +50,18 @@ def load_jxr_data(data):
 
 def null_image():
     ' Create an invalid image. For internal use. '
-    return QImage()
+    from PIL import Image
+    return Image.new()
 
 
 def image_from_data(data):
     ' Create an image object from data, which should be a bytestring. '
-    if isinstance(data, QImage):
-        return data
-    i = QImage()
-    if not i.loadFromData(data):
-        if what(None, data) == 'jxr':
-            return load_jxr_data(data)
-        raise NotImage('Not a valid image')
-    return i
+    from PIL import Image
+    import io
 
+    buffer = io.BytesIO(data)
+    img = Image.open(buffer)
+    return img
 
 def image_from_path(path):
     ' Load an image from the specified path. '
@@ -100,12 +75,8 @@ def image_from_x(x):
         return image_from_path(x)
     if hasattr(x, 'read'):
         return image_from_data(x.read())
-    if isinstance(x, (bytes, QImage)):
-        return image_from_data(x)
     if isinstance(x, bytearray):
         return image_from_data(bytes(x))
-    if isinstance(x, QPixmap):
-        return x.toImage()
     raise TypeError('Unknown image src type: %s' % type(x))
 
 
@@ -142,7 +113,7 @@ def image_to_data(img, compression_quality=95, fmt='JPEG', png_compression_level
         img.save(buffer, 'gif')
     elif is_jpeg:
         img.save(buffer, 'jpeg', quality=compression_quality, optimize=optimize_jpeg, progressive=jpeg_progressive)
-    elif fmt == 'PNG'
+    elif fmt == 'PNG':
         img.save(buffer, 'png', compress_level=png_compression_level)
     else:
         raise ValueError("Unkown format" + fmt)
@@ -182,7 +153,7 @@ def save_cover_data_to(data, path=None, bgcolor='#ffffff', resize_to=None, compr
     img, orig_fmt = image_and_format_from_data(data)
 
     # Remove transparency
-    background = Image.new('RGBA', img.size, ImageColor.getrgb(bgcolor))
+    background = create_canvas(img.size[0], img.size[1], bgcolor)
     img = Image.alpha_composite(background, img).convert('RGB')
 
     if grayscale:
@@ -213,52 +184,18 @@ def save_cover_data_to(data, path=None, bgcolor='#ffffff', resize_to=None, compr
 
 def blend_on_canvas(img, width, height, bgcolor='#ffffff'):
     ' Blend the `img` onto a canvas with the specified background color and size '
-    w, h = img.width(), img.height()
-    scaled, nw, nh = fit_image(w, h, width, height)
-    if scaled:
-        img = img.scaled(nw, nh, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
-        w, h = nw, nh
-    canvas = QImage(width, height, QImage.Format_RGB32)
-    canvas.fill(QColor(bgcolor))
-    overlay_image(img, canvas, (width - w)//2, (height - h)//2)
-    return canvas
+    from PIL import Image
 
+    img = img.thumbnail((width, height), Image.ANTIALIAS)
+    background = create_canvas(width, height, bgcolor)
 
-class Canvas(object):
-
-    def __init__(self, width, height, bgcolor='#ffffff'):
-        self.img = QImage(width, height, QImage.Format_RGB32)
-        self.img.fill(QColor(bgcolor))
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        pass
-
-    def compose(self, img, x=0, y=0):
-        img = image_from_data(img)
-        overlay_image(img, self.img, x, y)
-
-    def export(self, fmt='JPEG', compression_quality=95):
-        return image_to_data(self.img, compression_quality=compression_quality, fmt=fmt)
+    return Image.alpha_composite(background, img)
 
 
 def create_canvas(width, height, bgcolor='#ffffff'):
     'Create a blank canvas of the specified size and color '
-    img = QImage(width, height, QImage.Format_RGB32)
-    img.fill(QColor(bgcolor))
-    return img
-
-
-def overlay_image(img, canvas=None, left=0, top=0):
-    ' Overlay the `img` onto the canvas at the specified position '
-    if canvas is None:
-        canvas = QImage(img.size(), QImage.Format_RGB32)
-        canvas.fill(Qt.white)
-    left, top = int(left), int(top)
-    imageops.overlay(img, canvas, left, top)
-    return canvas
+    from PIL import Image, ImageColor
+    return Image.new('RGBA', (width, height), ImageColor.getrgb(bgcolor))
 
 
 def texture_image(canvas, texture):
@@ -270,42 +207,14 @@ def texture_image(canvas, texture):
 
 def blend_image(img, bgcolor='#ffffff'):
     ' Used to convert images that have semi-transparent pixels to opaque by blending with the specified color '
-    canvas = QImage(img.size(), QImage.Format_RGB32)
-    canvas.fill(QColor(bgcolor))
-    overlay_image(img, canvas)
-    return canvas
-# }}}
-
-# Image borders {{{
-
-
-def add_borders_to_image(img, left=0, top=0, right=0, bottom=0, border_color='#ffffff'):
-    img = image_from_data(img)
-    if not (left > 0 or right > 0 or top > 0 or bottom > 0):
-        return img
-    canvas = QImage(img.width() + left + right, img.height() + top + bottom, QImage.Format_RGB32)
-    canvas.fill(QColor(border_color))
-    overlay_image(img, canvas, left, top)
-    return canvas
-
-
-def remove_borders_from_image(img, fuzz=None):
-    ''' Try to auto-detect and remove any borders from the image. Returns
-    the image itself if no borders could be removed. `fuzz` is a measure of
-    what colors are considered identical (must be a number between 0 and 255 in
-    absolute intensity units). Default is from a tweak whose default value is 10. '''
-    fuzz = tweaks['cover_trim_fuzz_value'] if fuzz is None else fuzz
-    img = image_from_data(img)
-    ans = imageops.remove_borders(img, max(0, fuzz))
-    return ans if ans.size() != img.size() else img
+    return blend_on_canvas(img, img.size[0], img.size[1], bgcolor)
 # }}}
 
 # Cropping/scaling of images {{{
 
 
 def resize_image(img, width, height):
-    return img.scaled(int(width), int(height), Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
-
+    return img.resize((width, height))
 
 def resize_to_fit(img, width, height):
     img = image_from_data(img)
@@ -323,12 +232,9 @@ def clone_image(img):
 
 def scale_image(data, width=60, height=80, compression_quality=70, as_png=False, preserve_aspect_ratio=True):
     ''' Scale an image, returning it as either JPEG or PNG data (bytestring).
-    Transparency is alpha blended with white when converting to JPEG. Is thread
-    safe and does not require a QApplication. '''
+    Transparency is alpha blended with white when converting to JPEG. '''
     from PIL import Image
 
-    # We use Qt instead of ImageMagick here because ImageMagick seems to use
-    # some kind of memory pool, causing memory consumption to sky rocket.
     img = image_from_data(data)
 
     if preserve_aspect_ratio:
@@ -383,9 +289,7 @@ def image_has_transparent_pixels(img):
 
 
 def rotate_image(img, degrees):
-    t = QTransform()
-    t.rotate(degrees)
-    return image_from_data(img).transformed(t)
+    return t.rotate(degrees)
 
 
 def gaussian_sharpen_image(img, radius=0, sigma=3, high_quality=True):
@@ -494,21 +398,6 @@ def optimize_png(file_path):
     cmd = [exe] + '-fix -clobber -strip all -o7 -out'.split() + [False, True]
     return run_optimizer(file_path, cmd)
 
-
-def encode_jpeg(file_path, quality=80):
-    from calibre.utils.speedups import ReadOnlyFileBuffer
-    quality = max(0, min(100, int(quality)))
-    exe = get_exe_path('cjpeg')
-    cmd = [exe] + '-optimize -progressive -maxmemory 100M -quality'.split() + [str(quality)]
-    img = QImage()
-    if not img.load(file_path):
-        raise ValueError('%s is not a valid image file' % file_path)
-    ba = QByteArray()
-    buf = QBuffer(ba)
-    buf.open(QBuffer.WriteOnly)
-    if not img.save(buf, 'PPM'):
-        raise ValueError('Failed to export image to PPM')
-    return run_optimizer(file_path, cmd, as_filter=True, input_data=ReadOnlyFileBuffer(ba.data()))
 # }}}
 
 
