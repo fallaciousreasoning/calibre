@@ -87,8 +87,6 @@ ft_libs = []
 ft_inc_dirs = []
 podofo_inc = '/usr/include/podofo'
 podofo_lib = '/usr/lib'
-chmlib_inc_dirs = chmlib_lib_dirs = []
-sqlite_inc_dirs = []
 icu_inc_dirs = []
 icu_lib_dirs = []
 zlib_inc_dirs = []
@@ -101,9 +99,6 @@ if iswindows:
     sw_lib_dir  = os.path.join(prefix, 'lib')
     icu_inc_dirs = [sw_inc_dir]
     icu_lib_dirs = [sw_lib_dir]
-    sqlite_inc_dirs = [sw_inc_dir]
-    chmlib_inc_dirs = [sw_inc_dir]
-    chmlib_lib_dirs = [sw_lib_dir]
     ft_lib_dirs = [sw_lib_dir]
     ft_libs = ['freetype']
     ft_inc_dirs = [os.path.join(sw_inc_dir, 'freetype2'), sw_inc_dir]
