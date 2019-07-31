@@ -119,12 +119,12 @@ def initialize_constants():
         return ep[ep.rindex(':')+1:].strip()
 
     basenames, functions, modules, scripts = {}, {}, {}, {}
-    for x in ('console', 'gui'):
-        y = x + '_scripts'
-        basenames[x] = list(map(e2b, entry_points[y]))
-        functions[x] = list(map(e2f, entry_points[y]))
-        modules[x] = list(map(e2m, entry_points[y]))
-        scripts[x] = list(map(e2s, entry_points[y]))
+    x = 'console'
+    y = x + '_scripts'
+    basenames[x] = list(map(e2b, entry_points[y]))
+    functions[x] = list(map(e2f, entry_points[y]))
+    modules[x] = list(map(e2m, entry_points[y]))
+    scripts[x] = list(map(e2s, entry_points[y]))
 
 
 initialize_constants()
