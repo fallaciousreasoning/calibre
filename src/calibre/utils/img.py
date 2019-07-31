@@ -318,23 +318,23 @@ def resize_to_fit(img, width, height):
 def clone_image(img):
     ''' Returns a shallow copy of the image. However, the underlying data buffer
     will be automatically copied-on-write '''
-    return QImage(img)
+    return img.copy()
 
 
 def scale_image(data, width=60, height=80, compression_quality=70, as_png=False, preserve_aspect_ratio=True):
     ''' Scale an image, returning it as either JPEG or PNG data (bytestring).
     Transparency is alpha blended with white when converting to JPEG. Is thread
     safe and does not require a QApplication. '''
+    from PIL import Image
+
     # We use Qt instead of ImageMagick here because ImageMagick seems to use
     # some kind of memory pool, causing memory consumption to sky rocket.
     img = image_from_data(data)
+
     if preserve_aspect_ratio:
-        scaled, nwidth, nheight = fit_image(img.width(), img.height(), width, height)
-        if scaled:
-            img = img.scaled(nwidth, nheight, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        img = img.thumbnail((width, height), Image.ANTIALIAS)
     else:
-        if img.width() != width or img.height() != height:
-            img = img.scaled(width, height, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+        img = img.resize((width, height))
     fmt = 'PNG' if as_png else 'JPEG'
     w, h = img.width(), img.height()
     return w, h, image_to_data(img, compression_quality=compression_quality, fmt=fmt)
@@ -406,25 +406,6 @@ def oil_paint_image(img, radius=-1, high_quality=True):
 
 def normalize_image(img):
     return imageops.normalize(image_from_data(img))
-
-
-def quantize_image(img, max_colors=256, dither=True, palette=''):
-    ''' Quantize the image to contain a maximum of `max_colors` colors. By
-    default a palette is chosen automatically, if you want to use a fixed
-    palette, then pass in a list of color names in the `palette` variable. If
-    you, specify a palette `max_colors` is ignored. Note that it is possible
-    for the actual number of colors used to be less than max_colors.
-
-    :param max_colors: Max. number of colors in the auto-generated palette. Must be between 2 and 256.
-    :param dither: Whether to use dithering or not. dithering is almost always a good thing.
-    :param palette: Use a manually specified palette instead. For example: palette='red green blue #eee'
-    '''
-    img = image_from_data(img)
-    if img.hasAlphaChannel():
-        img = blend_image(img)
-    if palette and isinstance(palette, string_or_bytes):
-        palette = palette.split()
-    return imageops.quantize(img, max_colors, dither, [QColor(x).rgb() for x in palette])
 
 # }}}
 
@@ -550,7 +531,6 @@ def test():  # {{{
             raise SystemExit('optimize_png failed: %s' % ret)
         if glob('*.bak'):
             raise SystemExit('Spurious .bak files left behind')
-    quantize_image(img)
     oil_paint_image(img)
     gaussian_sharpen_image(img)
     gaussian_blur_image(img)
