@@ -111,12 +111,15 @@ def image_from_x(x):
 
 def image_and_format_from_data(data):
     ' Create an image object from the specified data which should be a bytestring and also return the format of the image '
-    ba = QByteArray(data)
-    buf = QBuffer(ba)
-    buf.open(QBuffer.ReadOnly)
-    r = QImageReader(buf)
-    fmt = bytes(r.format()).decode('utf-8')
-    return r.read(), fmt
+    import io
+    from PIL import Image
+
+    buffer = io.BytesIO(data)
+
+    image = Image.open(buffer)
+    format = image.format
+
+    return image, format
 # }}}
 
 # Saving images {{{
@@ -131,38 +134,20 @@ def image_to_data(img, compression_quality=95, fmt='JPEG', png_compression_level
     :param jpeg_optimized: Turns on the 'optimize' option for libjpeg which losslessly reduce file size
     :param jpeg_progressive: Turns on the 'progressive scan' option for libjpeg which allows JPEG images to be downloaded in streaming fashion
     '''
-    fmt = fmt.upper()
-    ba = QByteArray()
-    buf = QBuffer(ba)
-    buf.open(QBuffer.WriteOnly)
-    if fmt == 'GIF':
-        w = QImageWriter(buf, b'PNG')
-        w.setQuality(90)
-        if not w.write(img):
-            raise ValueError('Failed to export image as ' + fmt + ' with error: ' + w.errorString())
-        from PIL import Image
-        im = Image.open(BytesIO(ba.data()))
-        buf = BytesIO()
-        im.save(buf, 'gif')
-        return buf.getvalue()
+    import io
+    buffer = io.BytesIO()
+    
     is_jpeg = fmt in ('JPG', 'JPEG')
-    w = QImageWriter(buf, fmt.encode('ascii'))
-    if is_jpeg:
-        if img.hasAlphaChannel():
-            img = blend_image(img)
-        # QImageWriter only gained the following options in Qt 5.5
-        if jpeg_optimized:
-            w.setOptimizedWrite(True)
-        if jpeg_progressive:
-            w.setProgressiveScanWrite(True)
-        w.setQuality(compression_quality)
-    elif fmt == 'PNG':
-        cl = min(9, max(0, png_compression_level))
-        w.setQuality(10 * (9-cl))
-    if not w.write(img):
-        raise ValueError('Failed to export image as ' + fmt + ' with error: ' + w.errorString())
-    return ba.data()
+    if fmt == 'GIF':
+        img.save(buffer, 'gif')
+    elif is_jpeg:
+        img.save(buffer, 'jpeg', quality=compression_quality, optimize=optimize_jpeg, progressive=jpeg_progressive)
+    elif fmt == 'PNG'
+        img.save(buffer, 'png', compress_level=png_compression_level)
+    else:
+        raise ValueError("Unkown format" + fmt)
 
+    return buffer.getvalue()
 
 def save_image(img, path, **kw):
     ''' Save image to the specified path. Image format is taken from the file
@@ -193,34 +178,34 @@ def save_cover_data_to(data, path=None, bgcolor='#ffffff', resize_to=None, compr
         The image will be resized to fit into this target size. If None the
         value from the tweak is used.
     '''
-    fmt = normalize_format_name(data_fmt if path is None else os.path.splitext(path)[1][1:])
-    if isinstance(data, QImage):
-        img = data
-        changed = True
-    else:
-        img, orig_fmt = image_and_format_from_data(data)
-        orig_fmt = normalize_format_name(orig_fmt)
-        changed = fmt != orig_fmt
-    if resize_to is not None:
-        changed = True
-        img = img.scaled(resize_to[0], resize_to[1], Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
-    owidth, oheight = img.width(), img.height()
-    nwidth, nheight = tweaks['maximum_cover_size'] if minify_to is None else minify_to
-    scaled, nwidth, nheight = fit_image(owidth, oheight, nwidth, nheight)
-    if scaled:
-        changed = True
-        img = img.scaled(nwidth, nheight, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
-    if img.hasAlphaChannel():
-        changed = True
-        img = blend_image(img, bgcolor)
+    from PIL import Image, ImageColor
+    img, orig_fmt = image_and_format_from_data(data)
+
+    # Remove transparency
+    background = Image.new('RGBA', img.size, ImageColor.getrgb(bgcolor))
+    img = Image.alpha_composite(background, img).convert('RGB')
+
     if grayscale:
-        if not img.allGray():
-            changed = True
-            img = grayscale_image(img)
-    if path is None:
-        return image_to_data(img, compression_quality, fmt) if changed else data
-    with lopen(path, 'wb') as f:
-        f.write(image_to_data(img, compression_quality, fmt) if changed else data)
+        img = img.convert('L')
+
+    if resize_to is not None:
+        # Resize to new size
+        img = img.resize(resize_to)
+
+    if minify_to is not None:
+        # Resize, maintaining aspect ratio
+        img = img.thumbnail(minify_to,Image.ANTIALIAS)
+
+    # Get the output format
+    out_fmt = normalize_format_name(data_fmt if path is None else orig_fmt)
+    out_data = image_to_data(img, compression_quality, out_fmt)
+
+    if path is not None:
+        # Save image to disk
+        with lopen(path, 'wb') as f:
+            f.write(out_data)
+    else:
+        return out_data
 # }}}
 
 # Overlaying images {{{
