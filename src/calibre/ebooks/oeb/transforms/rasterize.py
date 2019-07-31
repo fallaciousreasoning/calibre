@@ -8,8 +8,6 @@ __copyright__ = '2008, Marshall T. Vandegrift <llasram@gmail.com>'
 
 import os, re
 
-from PyQt5.Qt import (
-    Qt, QByteArray, QBuffer, QIODevice, QColor, QImage, QPainter, QSvgRenderer)
 from calibre.ebooks.oeb.base import XHTML, XLINK
 from calibre.ebooks.oeb.base import SVG_MIME, PNG_MIME
 from calibre.ebooks.oeb.base import xml2str, xpath
@@ -32,8 +30,6 @@ class SVGRasterizer(object):
 
     def __init__(self, base_css=''):
         self.base_css = base_css
-        from calibre.gui2 import must_use_qt
-        must_use_qt()
 
     @classmethod
     def config(cls, cfg):
