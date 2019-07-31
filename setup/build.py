@@ -247,7 +247,7 @@ class Build(Command):
         ''')
 
     def add_options(self, parser):
-        choices = [e['name'] for e in read_extensions() if is_ext_allowed(e)]+['all', 'headless']
+        choices = [e['name'] for e in read_extensions() if is_ext_allowed(e)]+['all']
         parser.add_option('-1', '--only', choices=choices, default='all',
                 help=('Build only the named extension. Available: '+ ', '.join(choices)+'. Default:%default'))
         parser.add_option('--no-compile', default=False, action='store_true',
@@ -285,8 +285,6 @@ class Build(Command):
                 os.makedirs(self.d(dest))
             self.info('\n####### Building extension', ext.name, '#'*7)
             self.build(ext, dest)
-        if opts.only in {'all', 'headless'}:
-            self.build_headless()
 
     def dest(self, ext):
         ex = '.pyd' if iswindows else '.so'
@@ -363,80 +361,6 @@ class Build(Command):
             cmdline = ' '.join(['"%s"' % (arg) if ' ' in arg else arg for arg in args[0]])
             print("Error while executing: %s\n" % (cmdline))
             raise
-
-    def build_headless(self):
-        from setup.parallel_build import cpu_count
-        if iswindows or ishaiku:
-            return  # Dont have headless operation on these platforms
-        from setup.build_environment import glib_flags, fontconfig_flags, ft_inc_dirs, QMAKE
-        self.info('\n####### Building headless QPA plugin', '#'*7)
-        a = absolutize
-        headers = a([
-            'calibre/headless/headless_backingstore.h',
-            'calibre/headless/headless_integration.h',
-        ])
-        sources = a([
-            'calibre/headless/main.cpp',
-            'calibre/headless/headless_backingstore.cpp',
-            'calibre/headless/headless_integration.cpp',
-        ])
-        if isosx:
-            sources.extend(a(['calibre/headless/coretext_fontdatabase.mm']))
-        else:
-            headers.extend(a(['calibre/headless/fontconfig_database.h']))
-            sources.extend(a(['calibre/headless/fontconfig_database.cpp']))
-        others = a(['calibre/headless/headless.json'])
-        target = self.dest('headless')
-        if not self.newer(target, headers + sources + others):
-            return
-        # Arch and possibly other distros (fedora?) monkey patches qmake as a
-        # result of which it fails to add glib-2.0 and freetype2 to the list of
-        # library dependencies. Compiling QPA plugins uses the static
-        # libQt5PlatformSupport.a which needs glib to be specified after it for
-        # linking to succeed, so we add it to QMAKE_LIBS_PRIVATE (we cannot use
-        # LIBS as that would put -lglib-2.0 before libQt5PlatformSupport. See
-        # https://bugs.archlinux.org/task/38819
-
-        pro = textwrap.dedent(
-        '''\
-            TARGET = headless
-            PLUGIN_TYPE = platforms
-            PLUGIN_CLASS_NAME = HeadlessIntegrationPlugin
-            QT += core-private gui-private
-            greaterThan(QT_MAJOR_VERSION, 5)|greaterThan(QT_MINOR_VERSION, 7): {{
-                TEMPLATE = lib
-                CONFIG += plugin
-                QT += theme_support-private fontdatabase_support_private service_support_private eventdispatcher_support_private
-            }} else {{
-                load(qt_plugin)
-                QT += platformsupport-private
-            }}
-            HEADERS = {headers}
-            SOURCES = {sources}
-            OTHER_FILES = {others}
-            INCLUDEPATH += {freetype}
-            DESTDIR = {destdir}
-            CONFIG -= create_cmake  # Prevent qmake from generating a cmake build file which it puts in the calibre src directory
-            QMAKE_LIBS_PRIVATE += {glib} {fontconfig}
-            ''').format(
-                headers=' '.join(headers), sources=' '.join(sources), others=' '.join(others), destdir=self.d(
-                    target), glib=glib_flags, fontconfig=fontconfig_flags, freetype=' '.join(ft_inc_dirs))
-        bdir = self.j(self.build_dir, 'headless')
-        if not os.path.exists(bdir):
-            os.makedirs(bdir)
-        pf = self.j(bdir, 'headless.pro')
-        open(self.j(bdir, '.qmake.conf'), 'wb').close()
-        with open(pf, 'wb') as f:
-            f.write(pro.encode('utf-8'))
-        cwd = os.getcwd()
-        os.chdir(bdir)
-        try:
-            self.check_call([QMAKE] + [self.b(pf)])
-            self.check_call([self.env.make] + ['-j%d'%(cpu_count or 1)])
-        finally:
-            os.chdir(cwd)
-        if isosx:
-            os.rename(self.j(self.d(target), 'libheadless.dylib'), self.j(self.d(target), 'headless.so'))
 
     def build_sip_files(self, ext, src_dir):
         from setup.build_environment import pyqt
