@@ -12,7 +12,6 @@ from functools import partial
 
 from calibre import __appname__, prints, guess_type
 from calibre.constants import islinux, isbsd, ispy3
-from calibre.customize.ui import all_input_formats
 from calibre.ptempfile import TemporaryDirectory
 from calibre import CurrentDir
 from polyglot.builtins import iteritems, unicode_type
@@ -36,13 +35,7 @@ entry_points = {
              'calibre-complete     = calibre.utils.complete:main',
              'fetch-ebook-metadata = calibre.ebooks.metadata.sources.cli:main',
              'calibre-smtp         = calibre.utils.smtp:main',
-        ],
-        'gui_scripts' : [
-            __appname__+' = calibre.gui_launch:calibre',
-            'lrfviewer    = calibre.gui2.lrf_renderer.main:main',
-            'ebook-viewer = calibre.gui_launch:ebook_viewer',
-            'ebook-edit   = calibre.gui_launch:ebook_edit',
-        ],
+        ]
       }
 
 
