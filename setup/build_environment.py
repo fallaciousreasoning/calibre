@@ -93,7 +93,6 @@ icu_inc_dirs = []
 icu_lib_dirs = []
 zlib_inc_dirs = []
 zlib_lib_dirs = []
-openssl_inc_dirs, openssl_lib_dirs = [], []
 ICU = sw = ''
 
 if iswindows:
@@ -102,8 +101,6 @@ if iswindows:
     sw_lib_dir  = os.path.join(prefix, 'lib')
     icu_inc_dirs = [sw_inc_dir]
     icu_lib_dirs = [sw_lib_dir]
-    openssl_inc_dirs = [sw_inc_dir]
-    openssl_lib_dirs = [sw_lib_dir]
     sqlite_inc_dirs = [sw_inc_dir]
     chmlib_inc_dirs = [sw_inc_dir]
     chmlib_lib_dirs = [sw_lib_dir]
@@ -120,11 +117,10 @@ elif isosx:
     podofo_lib = os.path.join(sw, 'lib')
     ft_libs = ['freetype']
     ft_inc_dirs = [sw + '/include/freetype2']
-    icu_inc_dirs = [sw + '/include']
-    icu_lib_dirs = [sw + '/lib']
-    SSL = os.environ.get('OPENSSL_DIR', os.path.join(sw, 'private', 'ssl'))
-    openssl_inc_dirs = [os.path.join(SSL, 'include')]
-    openssl_lib_dirs = [os.path.join(SSL, 'lib')]
+
+    # TODO: Should be able to specify this some not-terrible way.
+    icu_inc_dirs = ['/usr/local/Cellar/icu4c/64.2/include']
+    icu_lib_dirs = ['/usr/local/Cellar/icu4c/64.2/lib']
 else:
     ft_inc_dirs = pkgconfig_include_dirs('freetype2', 'FT_INC_DIR',
             '/usr/include/freetype2')

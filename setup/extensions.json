@@ -35,24 +35,8 @@
         "needs_py2": true
     },
     {
-        "name": "certgen",
-        "sources": "calibre/utils/certgen.c",
-        "libraries": "crypto",
-        "windows_libraries": "libeay32",
-        "inc_dirs": "!openssl_inc_dirs",
-        "lib_dirs": "!openssl_lib_dirs"
-    },
-    {
-        "name": "html",
-        "sources": "calibre/gui2/tweak_book/editor/syntax/html.c"
-    },
-    {
         "name": "tokenizer",
         "sources": "tinycss/tokenizer.c"
-    },
-    {
-        "name": "_patiencediff_c",
-        "sources": "calibre/gui2/tweak_book/diff/_patiencediff_c.c"
     },
     {
         "name": "icu",
@@ -143,14 +127,6 @@
         "headers": "calibre/utils/imageops/imageops.h",
         "sip_files": "calibre/utils/imageops/imageops.sip",
         "inc_dirs": "calibre/utils/imageops"
-    },
-    {
-        "name": "qt_hack",
-        "sources": "calibre/ebooks/pdf/render/qt_hack.cpp",
-        "headers": "calibre/ebooks/pdf/render/qt_hack.h",
-        "sip_files": "calibre/ebooks/pdf/render/qt_hack.sip",
-        "inc_dirs": "calibre/ebooks/pdf/render",
-        "qt_private": "core gui"
     },
     {
         "name": "lzma_binding",
