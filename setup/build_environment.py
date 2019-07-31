@@ -110,8 +110,8 @@ elif isosx:
     sw = os.environ.get('SW', os.path.expanduser('~/sw'))
     podofo_inc = os.path.join(sw, 'include', 'podofo')
     podofo_lib = os.path.join(sw, 'lib')
-    ft_libs = ['freetype']
-    ft_inc_dirs = [sw + '/include/freetype2']
+    ft_libs = ['/usr/local/Cellar/freetype/2.10.1/lib']
+    ft_inc_dirs = ['/usr/local/Cellar/freetype/2.10.1/include/freetype']
 
     # TODO: Should be able to specify this some not-terrible way.
     icu_inc_dirs = ['/usr/local/Cellar/icu4c/64.2/include']

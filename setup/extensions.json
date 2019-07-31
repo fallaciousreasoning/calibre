@@ -63,13 +63,6 @@
         "headers": "calibre/utils/lzx/msstdint.h calibre/utils/lzx/lzc.h calibre/utils/lzx/lzxmodule.h calibre/utils/lzx/system.h calibre/utils/lzx/lzxc.h calibre/utils/lzx/lzxd.h calibre/utils/lzx/mspack.h"
     },
     {
-        "name": "freetype",
-        "sources": "calibre/utils/fonts/freetype.cpp",
-        "libraries": "!ft_libs",
-        "inc_dirs": "!ft_inc_dirs",
-        "lib_dirs": "!ft_lib_dirs"
-    },
-    {
         "name": "msdes",
         "sources": "calibre/utils/msdes/msdesmodule.c calibre/utils/msdes/des.c",
         "headers": "calibre/utils/msdes/spr.h calibre/utils/msdes/d3des.h",
@@ -83,36 +76,6 @@
         "name": "bzzdec",
         "sources": "calibre/ebooks/djvu/bzzdecoder.c",
         "windows_inc_dirs": "calibre/utils/chm"
-    },
-    {
-        "name": "podofo",
-        "sources": "calibre/utils/podofo/utils.cpp calibre/utils/podofo/output.cpp calibre/utils/podofo/doc.cpp calibre/utils/podofo/outline.cpp calibre/utils/podofo/podofo.cpp",
-        "headers": "calibre/utils/podofo/global.h",
-        "libraries": "podofo",
-        "lib_dirs": "!podofo_lib",
-        "inc_dirs": "!podofo_inc",
-        "error": "!podofo_error"
-    },
-    {
-        "name": "pictureflow",
-        "sources": "calibre/gui2/pictureflow/pictureflow.cpp",
-        "headers": "calibre/gui2/pictureflow/pictureflow.h",
-        "sip_files": "calibre/gui2/pictureflow/pictureflow.sip",
-        "inc_dirs": "calibre/gui2/pictureflow"
-    },
-    {
-        "name": "progress_indicator",
-        "sources": "calibre/gui2/progress_indicator/QProgressIndicator.cpp",
-        "headers": "calibre/gui2/progress_indicator/QProgressIndicator.h",
-        "sip_files": "calibre/gui2/progress_indicator/QProgressIndicator.sip",
-        "inc_dirs": "calibre/gui2/progress_indicator"
-    },
-    {
-        "name": "imageops",
-        "sources": "calibre/utils/imageops/imageops.cpp calibre/utils/imageops/quantize.cpp",
-        "headers": "calibre/utils/imageops/imageops.h",
-        "sip_files": "calibre/utils/imageops/imageops.sip",
-        "inc_dirs": "calibre/utils/imageops"
     },
     {
         "name": "lzma_binding",
