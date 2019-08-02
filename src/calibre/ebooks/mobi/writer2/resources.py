@@ -43,9 +43,8 @@ class Resources(object):
     def process_image(self, data):
         if not self.process_images:
             return data
-        func = mobify_image if self.opts.mobi_keep_original_images else rescale_image
         try:
-            return func(data)
+            return mobify_image(data)
         except Exception:
             if 'png' != what(None, data):
                 raise
@@ -57,7 +56,7 @@ class Resources(object):
                 data = lopen(pt.name, 'rb').read()
             finally:
                 os.remove(pt.name)
-            return func(data)
+            return mobify_image(data)
 
     def add_resources(self, add_fonts):
         oeb = self.oeb
