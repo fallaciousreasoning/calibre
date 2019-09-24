@@ -274,10 +274,7 @@ class Translations(POT):  # {{{
 
     def run(self, opts):
         self.compile_main_translations()
-        self.compile_content_server_translations()
         self.freeze_locales()
-        self.compile_user_manual_translations()
-        self.compile_website_translations()
 
     def compile_group(self, files, handle_stats=None, file_ok=None, action_per_file=None):
         from calibre.constants import islinux
@@ -393,38 +390,7 @@ class Translations(POT):  # {{{
         h = hashlib.sha1(data)
         h.update(f.encode('utf-8'))
         return data, h
-
-    def compile_content_server_translations(self):
-        self.info('Compiling content-server translations')
-        from calibre.utils.rapydscript import msgfmt
-        from calibre.utils.zipfile import ZipFile, ZIP_DEFLATED, ZipInfo, ZIP_STORED
-        with ZipFile(self.j(self.RESOURCES, 'content-server', 'locales.zip'), 'w', ZIP_DEFLATED) as zf:
-            for src in glob.glob(os.path.join(self.TRANSLATIONS, 'content-server', '*.po')):
-                data, h = self.hash_and_data(src)
-                current_hash = h.digest()
-                saved_hash, saved_data = self.read_cache(src)
-                if current_hash == saved_hash:
-                    raw = saved_data
-                else:
-                    self.info('\tParsing ' + os.path.basename(src))
-                    raw = None
-                    po_data = data.decode('utf-8')
-                    data = json.loads(msgfmt(po_data))
-                    translated_entries = {k:v for k, v in iteritems(data['entries']) if v and sum(map(len, v))}
-                    data[u'entries'] = translated_entries
-                    data[u'hash'] = h.hexdigest()
-                    cdata = b'{}'
-                    if translated_entries:
-                        raw = json.dumps(data, ensure_ascii=False, sort_keys=True)
-                        if isinstance(raw, type(u'')):
-                            raw = raw.encode('utf-8')
-                        cdata = raw
-                    self.write_cache(cdata, current_hash, src)
-                if raw:
-                    zi = ZipInfo(os.path.basename(src).rpartition('.')[0])
-                    zi.compress_type = ZIP_STORED if is_ci else ZIP_DEFLATED
-                    zf.writestr(zi, raw)
-
+        
     def check_iso639(self, raw, path):
         from calibre.utils.localization import langnames_to_langcodes
         rmap = {}
@@ -462,102 +428,7 @@ class Translations(POT):  # {{{
     @property
     def stats(self):
         return self.j(self.d(self.DEST), 'stats.calibre_msgpack')
-
-    def compile_website_translations(self):
-        from calibre.utils.zipfile import ZipFile, ZipInfo, ZIP_STORED
-        from calibre.ptempfile import TemporaryDirectory
-        from calibre.utils.localization import get_iso639_translator, get_language, get_iso_language
-        self.info('Compiling website translations...')
-        srcbase = self.j(self.d(self.SRC), 'translations', 'website')
-        fmap = {}
-        files = []
-        stats = {}
-        done = []
-
-        def handle_stats(src, nums):
-            locale = fmap[src]
-            trans = nums[0]
-            total = trans if len(nums) == 1 else (trans + nums[1])
-            stats[locale] = int(round(100 * trans / total))
-
-        with TemporaryDirectory() as tdir, ZipFile(self.j(srcbase, 'locales.zip'), 'w', ZIP_STORED) as zf:
-            for f in os.listdir(srcbase):
-                if f.endswith('.po'):
-                    l = f.partition('.')[0]
-                    pf = l.split('_')[0]
-                    if pf in {'en'}:
-                        continue
-                    d = os.path.join(tdir, l + '.mo')
-                    f = os.path.join(srcbase, f)
-                    fmap[f] = l
-                    files.append((f, d))
-            self.compile_group(files, handle_stats=handle_stats)
-
-            for locale, translated in iteritems(stats):
-                if translated >= 20:
-                    with open(os.path.join(tdir, locale + '.mo'), 'rb') as f:
-                        raw = f.read()
-                    zi = ZipInfo(os.path.basename(f.name))
-                    zi.compress_type = ZIP_STORED
-                    zf.writestr(zi, raw)
-                    done.append(locale)
-            dl = done + ['en']
-
-            lang_names = {}
-            for l in dl:
-                if l == 'en':
-                    t = get_language
-                else:
-                    t = getattr(get_iso639_translator(l), 'gettext' if ispy3 else 'ugettext')
-                    t = partial(get_iso_language, t)
-                lang_names[l] = {x: t(x) for x in dl}
-            zi = ZipInfo('lang-names.json')
-            zi.compress_type = ZIP_STORED
-            zf.writestr(zi, json.dumps(lang_names, ensure_ascii=False).encode('utf-8'))
-        dest = self.j(self.d(self.stats), 'website-languages.txt')
-        data = ' '.join(sorted(done))
-        if not isinstance(data, bytes):
-            data = data.encode('utf-8')
-        with open(dest, 'wb') as f:
-            f.write(data)
-
-    def compile_user_manual_translations(self):
-        self.info('Compiling user manual translations...')
-        srcbase = self.j(self.d(self.SRC), 'translations', 'manual')
-        destbase = self.j(self.d(self.SRC), 'manual', 'locale')
-        complete = {}
-        all_stats = defaultdict(lambda : {'translated': 0, 'untranslated': 0})
-        files = []
-        for x in os.listdir(srcbase):
-            q = self.j(srcbase, x)
-            if not os.path.isdir(q):
-                continue
-            dest = self.j(destbase, x, 'LC_MESSAGES')
-            if os.path.exists(dest):
-                shutil.rmtree(dest)
-            os.makedirs(dest)
-            for po in os.listdir(q):
-                if not po.endswith('.po'):
-                    continue
-                mofile = self.j(dest, po.rpartition('.')[0] + '.mo')
-                files.append((self.j(q, po), mofile))
-
-        def handle_stats(src, nums):
-            locale = self.b(self.d(src))
-            stats = all_stats[locale]
-            stats['translated'] += nums[0]
-            if len(nums) > 1:
-                stats['untranslated'] += nums[1]
-
-        self.compile_group(files, handle_stats=handle_stats)
-        for locale, stats in iteritems(all_stats):
-            dump_json(stats, self.j(srcbase, locale, 'stats.json'))
-            total = stats['translated'] + stats['untranslated']
-            # Raise the 30% threshold in the future
-            if total and (stats['translated'] / float(total)) > 0.3:
-                complete[locale] = stats
-        dump_json(complete, self.j(destbase, 'completed.json'))
-
+        
     def clean(self):
         if os.path.exists(self.stats):
             os.remove(self.stats)
