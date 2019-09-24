@@ -1,72 +1,13 @@
 [
     {
-        "name": "hunspell",
-        "sources": "hunspell/affentry.cxx hunspell/affixmgr.cxx hunspell/csutil.cxx hunspell/dictmgr.cxx hunspell/filemgr.cxx hunspell/hashmgr.cxx hunspell/hunspell.cxx hunspell/phonet.cxx hunspell/replist.cxx hunspell/suggestmgr.cxx calibre/utils/spell/hunspell_wrapper.cpp",
-        "inc_dirs": "hunspell",
-        "defines": "HUNSPELL_STATIC",
-        "windows_defines": "HUNSPELL_STATIC _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE",
-        "optimize_level": 2
-    },
-    {
-        "name": "monotonic",
-        "sources": "calibre/utils/monotonic.c",
-        "linux_libraries": "rt",
-        "needs_py2": true
-    },
-    {
-        "name": "unicode_names",
-        "headers": "unicode_names/names.h unicode_names/data-types.h",
-        "sources": "unicode_names/unicode_names.c",
-        "needs_c99": true
-    },
-    {
-        "name": "speedup",
-        "sources": "calibre/utils/speedup.c",
-        "libraries": "m",
-        "windows_libraries": ""
-    },
-    {
-        "name": "zlib2",
-        "sources": "calibre/utils/zlib2.c",
-        "inc_dirs": "!zlib_inc_dirs",
-        "lib_dirs": "!zlib_lib_dirs",
-        "libraries": "z",
-        "windows_libraries": "zlib",
-        "needs_py2": true
-    },
-    {
         "name": "tokenizer",
         "sources": "tinycss/tokenizer.c"
-    },
-    {
-        "name": "icu",
-        "sources": "calibre/utils/icu.c",
-        "headers": "calibre/utils/icu_calibre_utils.h",
-        "libraries": "icudata icui18n icuuc icuio",
-        "windows_libraries": "icudt icuin icuuc icuio",
-        "lib_dirs": "!icu_lib_dirs",
-        "inc_dirs": "!icu_inc_dirs"
-    },
-    {
-        "name": "matcher",
-        "sources": "calibre/utils/matcher.c",
-        "headers": "calibre/utils/icu_calibre_utils.h",
-        "libraries": "icudata icui18n icuuc icuio",
-        "windows_libraries": "icudt icuin icuuc icuio",
-        "lib_dirs": "!icu_lib_dirs",
-        "inc_dirs": "!icu_inc_dirs"
     },
     {
         "name": "lzx",
         "sources": "calibre/utils/lzx/lzxmodule.c calibre/utils/lzx/compressor.c calibre/utils/lzx/lzxd.c calibre/utils/lzx/lzc.c calibre/utils/lzx/lzxc.c",
         "inc_dirs": "calibre/utils/lzx",
         "headers": "calibre/utils/lzx/msstdint.h calibre/utils/lzx/lzc.h calibre/utils/lzx/lzxmodule.h calibre/utils/lzx/system.h calibre/utils/lzx/lzxc.h calibre/utils/lzx/lzxd.h calibre/utils/lzx/mspack.h"
-    },
-    {
-        "name": "msdes",
-        "sources": "calibre/utils/msdes/msdesmodule.c calibre/utils/msdes/des.c",
-        "headers": "calibre/utils/msdes/spr.h calibre/utils/msdes/d3des.h",
-        "inc_dirs": "calibre/utils/msdes"
     },
     {
         "name": "cPalmdoc",
@@ -82,33 +23,5 @@
         "sources": "lzma/*.c",
         "headers": "lzma/*.h",
         "defines": "_7ZIP_ST"
-    },
-    {
-        "name": "winutil",
-        "only": "windows",
-        "sources": "calibre/utils/windows/winutil.c",
-        "libraries": "shell32 wininet advapi32",
-        "cflags": "/X"
-    },
-    {
-        "name": "wpd",
-        "only": "windows",
-        "sources": "calibre/devices/mtp/windows/utils.cpp calibre/devices/mtp/windows/device_enumeration.cpp calibre/devices/mtp/windows/content_enumeration.cpp calibre/devices/mtp/windows/device.cpp calibre/devices/mtp/windows/wpd.cpp",
-        "headers": "calibre/devices/mtp/windows/global.h",
-        "libraries": "ole32 oleaut32 portabledeviceguids user32",
-        "cflags": "/X"
-    },
-    {
-        "name": "winfonts",
-        "only": "windows",
-        "sources": "calibre/utils/fonts/winfonts.cpp",
-        "libraries": "Gdi32 User32",
-        "cflags": "/X"
-    },
-    {
-        "name": "cocoa",
-        "only": "osx",
-        "sources": "calibre/utils/cocoa.m calibre/utils/cocoa_wrapper.c",
-        "ldflags": "-framework Cocoa"
     }
 ]

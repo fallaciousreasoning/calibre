@@ -158,26 +158,17 @@ class Plugins(collections.Mapping):
     def __init__(self):
         self._plugins = {}
         plugins = [
-                'pictureflow',
                 'lzx',
-                'msdes',
-                'podofo',
                 'cPalmdoc',
                 'progress_indicator',
-                'chmlib',
                 'icu',
                 'speedup',
-                'unicode_names',
                 'html',
                 'freetype',
-                'imageops',
-                'qt_hack',
-                'hunspell',
                 '_patiencediff_c',
                 'bzzdec',
                 'matcher',
                 'tokenizer',
-                'certgen',
                 'lzma_binding',
             ]
         if not ispy3:
@@ -185,14 +176,6 @@ class Plugins(collections.Mapping):
                 'monotonic',
                 'zlib2',
             ])
-        if iswindows:
-            plugins.extend(['winutil', 'wpd', 'winfonts'])
-        if isosx:
-            plugins.append('usbobserver')
-            plugins.append('cocoa')
-        if isfreebsd or ishaiku or islinux or isosx:
-            plugins.append('libusb')
-            plugins.append('libmtp')
         self.plugins = frozenset(plugins)
 
     def load_plugin(self, name):
