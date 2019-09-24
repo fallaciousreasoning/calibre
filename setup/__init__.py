@@ -42,6 +42,7 @@ def newer(targets, sources):
             return True
     ttimes = map(lambda x: os.stat(x).st_mtime, targets)
     stimes = map(lambda x: os.stat(x).st_mtime, sources)
+    stimes += [0]
     newest_source, oldest_target = max(stimes), min(ttimes)
     return newest_source > oldest_target
 
