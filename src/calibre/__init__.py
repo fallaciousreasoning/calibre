@@ -377,15 +377,6 @@ def is_mobile_ua(ua):
     return 'Mobile/' in ua or 'Mobile ' in ua
 
 
-def random_user_agent(choose=None, allow_ie=True):
-    from calibre.utils.random_ua import common_user_agents
-    ua_list = common_user_agents()
-    ua_list = list(filter(lambda x: not is_mobile_ua(x), ua_list))
-    if not allow_ie:
-        ua_list = list(filter(lambda x: 'Trident/' not in x and 'Edge/' not in x, ua_list))
-    return random.choice(ua_list) if choose is None else ua_list[choose]
-
-
 def browser(honor_time=True, max_time=2, mobile_browser=False, user_agent=None, verify_ssl_certificates=True, handle_refresh=True):
     '''
     Create a mechanize browser for web scraping. The browser handles cookies,
