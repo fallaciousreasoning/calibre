@@ -80,7 +80,10 @@ def main(args=sys.argv):
         print('Valid commands:', ', '.join(commands.__all__))
         return 1
 
+    print('Commands is: ', commands)
+    print('Command is: ', command)
     command = getattr(commands, command)
+    print('Is now:', command)
 
     parser = option_parser()
     command.add_all_options(parser)

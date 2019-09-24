@@ -55,7 +55,7 @@ class Develop(Command):
     short_description = 'Setup a development environment for calibre'
     MODE = 0o755
 
-    sub_commands = ['build', 'resources', 'iso639', 'iso3166', 'gui',]
+    sub_commands = ['build', 'resources', 'iso639', 'iso3166',]
 
     def add_postinstall_options(self, parser):
         parser.add_option('--make-errors-fatal', action='store_true', default=False,
@@ -168,7 +168,7 @@ class Develop(Command):
         self.info('\nDevelopment environment successfully setup')
 
     def write_templates(self):
-        for typ in ('console', 'gui'):
+        for typ in ('console'):
             for name, mod, func in zip(basenames[typ], modules[typ],
                     functions[typ]):
                 self.write_template(name, mod, func)
@@ -217,7 +217,7 @@ class Install(Develop):
     ''')
     short_description = 'Install calibre from source'
 
-    sub_commands = ['build', 'gui']
+    sub_commands = ['build']
 
     def add_options(self, parser):
         parser.add_option('--prefix', help='Installation prefix.')
@@ -335,7 +335,7 @@ class Bootstrap(Command):
 
     description = 'Bootstrap a fresh checkout of calibre from git to a state where it can be installed. Requires various development tools/libraries/headers'
     TRANSLATIONS_REPO = 'https://github.com/kovidgoyal/calibre-translations.git'
-    sub_commands = 'build iso639 iso3166 translations gui resources cacerts recent_uas'.split()
+    sub_commands = 'build iso639 iso3166 translations resources cacerts recent_uas'.split()
 
     def add_options(self, parser):
         parser.add_option('--ephemeral', default=False, action='store_true',

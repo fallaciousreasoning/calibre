@@ -9,7 +9,6 @@ __docformat__ = 'restructuredtext en'
 __all__ = [
         'pot', 'translations', 'get_translations', 'iso639', 'iso3166',
         'build', 'mathjax', 'man_pages',
-        'gui',
         'develop', 'install',
         'kakasi', 'coffee', 'rapydscript', 'cacerts', 'recent_uas', 'resources',
         'check', 'test',
@@ -45,9 +44,6 @@ develop = Develop()
 install = Install()
 sdist = Sdist()
 bootstrap = Bootstrap()
-
-from setup.gui import GUI
-gui = GUI()
 
 from setup.check import Check
 check = Check()
