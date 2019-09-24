@@ -10,7 +10,7 @@ __all__ = [
         'pot', 'translations', 'get_translations', 'iso639', 'iso3166',
         'build', 'mathjax', 'man_pages',
         'develop', 'install',
-        'kakasi', 'coffee', 'rapydscript', 'cacerts', 'recent_uas', 'resources',
+        'kakasi', 'resources',
         'check', 'test',
         'sdist', 'bootstrap',
         'manual', 'tag_release',
@@ -51,13 +51,9 @@ check = Check()
 from setup.test import Test
 test = Test()
 
-from setup.resources import Resources, Kakasi, Coffee, CACerts, RapydScript, RecentUAs
+from setup.resources import Resources, Kakasi
 resources = Resources()
 kakasi = Kakasi()
-coffee = Coffee()
-cacerts = CACerts()
-recent_uas = RecentUAs()
-rapydscript = RapydScript()
 
 from setup.publish import Manual, TagRelease, Stage1, Stage2, \
         Stage3, Stage4, Stage5, Publish, PublishBetas, ManPages
