@@ -1822,7 +1822,7 @@ if __name__ == '__main__':
 
         for x in ('lxml', 'calibre.ebooks.BeautifulSoup', 'uuid',
             'calibre.utils.terminal', 'calibre.utils.img', 'PIL', 'Image',
-            'sqlite3', 'mechanize', 'httplib', 'xml', 'inspect', 'urllib',
+            'httplib', 'xml', 'inspect', 'urllib',
             'calibre.utils.date', 'calibre.utils.config', 'platform',
             'calibre.utils.zipfile', 'calibre.utils.formatter',
         ):
