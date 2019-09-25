@@ -165,7 +165,8 @@ def save_cover_data_to(data, path=None, bgcolor='#ffffff', resize_to=None, compr
 
     if minify_to is not None:
         # Resize, maintaining aspect ratio
-        img = img.thumbnail(minify_to,Image.ANTIALIAS)
+        img = img.copy()
+        img.thumbnail(minify_to,Image.ANTIALIAS)
 
     # Get the output format
     out_fmt = normalize_format_name(data_fmt if path is None else orig_fmt)
@@ -186,7 +187,8 @@ def blend_on_canvas(img, width, height, bgcolor='#ffffff'):
     ' Blend the `img` onto a canvas with the specified background color and size '
     from PIL import Image
 
-    img = img.thumbnail((width, height), Image.ANTIALIAS)
+    img = img.copy()
+    img.thumbnail((width, height), Image.ANTIALIAS)
     background = create_canvas(width, height, bgcolor)
 
     return Image.alpha_composite(background, img)
@@ -218,7 +220,7 @@ def resize_image(img, width, height):
 
 def resize_to_fit(img, width, height):
     img = image_from_data(img)
-    resize_needed, nw, nh = fit_image(img.width(), img.height(), width, height)
+    resize_needed, nw, nh = fit_image(img.width, img.height, width, height)
     if resize_needed:
         img = resize_image(img, nw, nh)
     return resize_needed, img
@@ -238,11 +240,12 @@ def scale_image(data, width=60, height=80, compression_quality=70, as_png=False,
     img = image_from_data(data)
 
     if preserve_aspect_ratio:
-        img = img.thumbnail((width, height), Image.ANTIALIAS)
+        img = img.copy()
+        img.thumbnail((width, height), Image.ANTIALIAS)
     else:
         img = img.resize((width, height))
     fmt = 'PNG' if as_png else 'JPEG'
-    w, h = img.width(), img.height()
+    w, h = img.size
     return w, h, image_to_data(img, compression_quality=compression_quality, fmt=fmt)
 
 
@@ -256,8 +259,8 @@ def crop_image(img, x, y, width, height):
     auto-truncated.
     '''
     img = image_from_data(img)
-    width = min(width, img.width() - x)
-    height = min(height, img.height() - y)
+    width = min(width, img.width - x)
+    height = min(height, img.height - y)
     return img.copy(x, y, width, height)
 
 # }}}

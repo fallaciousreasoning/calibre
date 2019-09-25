@@ -104,14 +104,16 @@ class Resources(object):
                 self.mime_map[item.href] = 'image/%s'%what(None, data)
                 index += 1
 
+                import traceback
                 if cover_href and item.href == cover_href:
                     self.cover_offset = self.item_map[item.href] - 1
                     self.used_image_indices.add(self.cover_offset)
                     try:
                         data = rescale_image(item.data, dimen=MAX_THUMB_DIMEN,
                             maxsizeb=MAX_THUMB_SIZE)
-                    except:
+                    except Exception as e:
                         self.log.warn('Failed to generate thumbnail')
+                        print('Error was: ', traceback.format_exc())
                     else:
                         self.image_indices.add(len(self.records))
                         self.records.append(data)
