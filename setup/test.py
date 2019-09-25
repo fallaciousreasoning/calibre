@@ -63,12 +63,6 @@ def find_tests(which_tests=None):
     if ok('build'):
         from calibre.test_build import find_tests
         a(find_tests())
-    if ok('srv'):
-        from calibre.srv.tests.main import find_tests
-        a(find_tests())
-    if ok('db'):
-        from calibre.db.tests.main import find_tests
-        a(find_tests())
     if ok('polish'):
         from calibre.ebooks.oeb.polish.tests.main import find_tests
         a(find_tests())
@@ -100,9 +94,6 @@ def find_tests(which_tests=None):
     if ok('icu'):
         from calibre.utils.icu_test import find_tests
         a(find_tests())
-    if ok('smartypants'):
-        from calibre.utils.smartypants import run_tests
-        a(run_tests(return_tests=True))
     if ok('ebooks'):
         from calibre.ebooks.metadata.rtf import find_tests
         a(find_tests())
@@ -111,20 +102,9 @@ def find_tests(which_tests=None):
         a(find_tests())
         from calibre.ebooks.metadata.author_mapper import find_tests
         a(find_tests())
-        from calibre.utils.shared_file import find_tests
-        a(find_tests())
-        from calibre.utils.test_lock import find_tests
-        a(find_tests())
-        from calibre.utils.search_query_parser_test import find_tests
-        a(find_tests())
         from calibre.utils.html2text import find_tests
         a(find_tests())
-        from calibre.library.comments import find_tests
-        a(find_tests())
         a(unittest.defaultTestLoader.loadTestsFromTestCase(TestImports))
-    if ok('dbcli'):
-        from calibre.db.cli.tests import find_tests
-        a(find_tests())
 
     tests = unittest.TestSuite(ans)
     return tests
