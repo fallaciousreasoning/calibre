@@ -167,7 +167,6 @@ class Plugins(collections.Mapping):
                 'freetype',
                 '_patiencediff_c',
                 'bzzdec',
-                'matcher',
                 'tokenizer',
                 'lzma_binding',
             ]

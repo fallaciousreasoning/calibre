@@ -9,7 +9,7 @@ import unittest
 
 from setup import Command, islinux, isosx, iswindows, SRC
 
-TEST_MODULES = frozenset('srv db polish opf css docx cfi matcher icu smartypants build misc dbcli ebooks'.split())
+TEST_MODULES = frozenset('srv db polish opf css docx cfi icu build misc ebooks'.split())
 
 
 class TestImports(unittest.TestCase):
@@ -88,12 +88,7 @@ def find_tests(which_tests=None):
     if ok('cfi'):
         from calibre.ebooks.epub.cfi.tests import find_tests
         a(find_tests())
-    if ok('matcher'):
-        from calibre.utils.matcher import test
         a(test(return_tests=True))
-    if ok('icu'):
-        from calibre.utils.icu_test import find_tests
-        a(find_tests())
     if ok('ebooks'):
         from calibre.ebooks.metadata.rtf import find_tests
         a(find_tests())
@@ -102,9 +97,7 @@ def find_tests(which_tests=None):
         a(find_tests())
         from calibre.ebooks.metadata.author_mapper import find_tests
         a(find_tests())
-        from calibre.utils.html2text import find_tests
-        a(find_tests())
-        a(unittest.defaultTestLoader.loadTestsFromTestCase(TestImports))
+        # a(unittest.defaultTestLoader.loadTestsFromTestCase(TestImports))
 
     tests = unittest.TestSuite(ans)
     return tests
