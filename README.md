@@ -19,6 +19,10 @@ A long term goal for this project is to run on the web, under [pyodide](https://
    ```
    ./run-local ebook-convert path/to/input.epub path/to/ouput.mobi
    ```
+4. Install missing packages with pip as needed...
+    ```
+    pip install <missing-package-1> ... <missing-package-n>
+    ```
 
 ## calibre
 This project is a fork of Calibre: https://github.com/kovidgoyal/calibre
