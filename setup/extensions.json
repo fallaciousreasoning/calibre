@@ -1,5 +1,11 @@
 [
     {
+        "name": "speedup",
+        "sources": "calibre/utils/speedup.c",
+        "libraries": "m",
+        "windows_libraries": ""
+    },
+    {
         "name": "tokenizer",
         "sources": "tinycss/tokenizer.c"
     },
