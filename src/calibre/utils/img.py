@@ -112,7 +112,7 @@ def image_to_data(img, compression_quality=95, fmt='JPEG', png_compression_level
     if fmt == 'GIF':
         img.save(buffer, 'gif')
     elif is_jpeg:
-        img.save(buffer, 'jpeg', quality=compression_quality, optimize=optimize_jpeg, progressive=jpeg_progressive)
+        img.save(buffer, 'jpeg', quality=compression_quality, optimize=jpeg_optimized, progressive=jpeg_progressive)
     elif fmt == 'PNG':
         img.save(buffer, 'png', compress_level=png_compression_level)
     else:
