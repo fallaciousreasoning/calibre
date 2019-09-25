@@ -198,33 +198,6 @@ class Resources(Command):  # {{{
             with open(dest, 'wb') as f:
                 f.write(msgpack_dumps(only_unicode_recursive(complete)))
 
-        self.info('\tCreating template-functions.json')
-        dest = self.j(self.RESOURCES, 'template-functions.json')
-        function_dict = {}
-        import inspect
-        from calibre.utils.formatter_functions import formatter_functions
-        for obj in formatter_functions().get_builtins().values():
-            eval_func = inspect.getmembers(obj,
-                    lambda x: inspect.ismethod(x) and x.__name__ == 'evaluate')
-            try:
-                lines = [l[4:] for l in inspect.getsourcelines(eval_func[0][1])[0]]
-            except:
-                continue
-            lines = ''.join(lines)
-            function_dict[obj.name] = lines
-        dump_json(function_dict, dest)
-
-        self.info('\tCreating editor-functions.json')
-        dest = self.j(self.RESOURCES, 'editor-functions.json')
-        function_dict = {}        
-        dump_json(function_dict, dest)
-        self.info('\tCreating user-manual-translation-stats.json')
-        d = {}
-        for lc, stats in iteritems(json.load(open(self.j(self.d(self.SRC), 'manual', 'locale', 'completed.json')))):
-            total = sum(itervalues(stats))
-            d[lc] = stats['translated'] / float(total)
-        dump_json(d, self.j(self.RESOURCES, 'user-manual-translation-stats.json'))
-
     def clean(self):
         for x in ('scripts', 'ebook-convert-complete'):
             x = self.j(self.RESOURCES, x+'.pickle')
