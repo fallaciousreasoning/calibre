@@ -6,7 +6,7 @@ These are all the dependencies for calibre-converters.
 | Package         | Version   | Pure Python | Status   |
 | --------------- | --------- | ----------- | -------- |
 | lxml            | 4.4.0     | N           | Need     |
-| regex           | 2019.4.14 | N           | Need     |
+| regex           | 2019.4.14 | N           | Pyodide  |
 | soupsieve       | 1.9.2     | Y           |
 | css_parser      | 1.0.4     | Y           |
 | html5lib        | 1.0.1     | Y           |
@@ -22,5 +22,6 @@ These are all the dependencies for calibre-converters.
 
 ## Explanation of statuses:
 **Need:** Need in order to run. <br>
+**Pyodide:** Need and supported in Pyodide <br>
 **Shim:** Can be shimmed with web APIs. <br>
 **Unneeded:** Not an actual requirement, should work without.
