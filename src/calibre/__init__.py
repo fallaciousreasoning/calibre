@@ -465,8 +465,7 @@ def detect_ncpus():
             try:
                 ans = multiprocessing.cpu_count()
             except Exception:
-                from PyQt5.Qt import QThread
-                ans = QThread.idealThreadCount()
+                ans = 1
         _ncpus = max(1, ans)
     return _ncpus
 
