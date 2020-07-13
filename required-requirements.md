@@ -5,7 +5,7 @@ These are all the dependencies for calibre-converters.
 
 | Package         | Version   | Pure Python | Status                                                        |
 | --------------- | --------- | ----------- | ------------------------------------------------------------- |
-| lxml            | 4.4.0     | N           | Need                                                          |
+| lxml            | 4.4.0     | N           | [Pyodide]( https://github.com/iodide-project/pyodide/pull/544)|
 | regex           | 2019.4.14 | N           | [Pyodide](https://github.com/iodide-project/pyodide/pull/538) |
 | soupsieve       | 1.9.2     | Y           |
 | css_parser      | 1.0.4     | Y           |
